@@ -1,69 +1,50 @@
-'use client';
+"use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Note } from "../../types/note";
-import css from "./NoteList.module.css";
-import { deleteNote } from "@/lib/api";
+import { deleteNote } from "@/lib/api/clientApi";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Note } from "@/types/note";
+import toast, { Toaster } from "react-hot-toast";
+import css from "./NoteList.module.css";
 
 interface NoteListProps {
-  notes: Note[];
+  items: Note[];
 }
 
-export default function NoteList({ notes }: NoteListProps) {
+export default function NoteList({ items }: NoteListProps) {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
-  const mutationDelete = useMutation({
-    mutationFn: async (id: string) => await deleteNote(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notes"] }),
+  const { mutate } = useMutation({
+    mutationFn: deleteNote,
+    onSuccess() {
+      toast.success("Your note has been deleted.");
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError() {
+      toast.error("Sorry, something is wrong. Try again.");
+    },
   });
 
-  const handleDeleteNote = (id: string) => {
-    mutationDelete.mutate(id);
-  };
-
-  const handleOpenModal = (id: string) => {
-    router.push(`/notes/${id}`); 
-  };
-
   return (
-    <ul className={css.list}>
-      {notes.map((note) => (
-        <li
-          key={note.id}
-          className={css.listItem}
-          onClick={() => handleOpenModal(note.id)}
-          style={{ cursor: "pointer" }}
-        >
-          <h2 className={css.title}>{note.title}</h2>
-          <p className={css.content}>{note.content}</p>
-          <div className={css.footer}>
-            <span className={css.tag}>{note.tag}</span>
-
-            
-            <Link
-              href={`/notes/${note.id}`}
-              className={`${css.tag} ${css["tag-link"]}`}
-              onClick={(e) => e.stopPropagation()} 
-            >
-              View details
-            </Link>
-
-           
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); 
-                handleDeleteNote(note.id);
-              }}
-              className={css.button}
-            >
-              Delete
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className={css.list}>
+        {items.map((item) => (
+          <li key={item.id} className={css.listItem}>
+            <h2 className={css.title}>{item.title}</h2>
+            <p className={css.content}>{item.content}</p>
+            <div className={css.footer}>
+              <span className={css.tag}>{item.tag}</span>
+              <Link href={`/notes/${item.id}`} className={css.button} scroll={false}>
+                View details
+              </Link>
+              <button onClick={() => mutate(item.id)} className={css.button}>
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Toaster position="top-right" />
+    </>
   );
 }

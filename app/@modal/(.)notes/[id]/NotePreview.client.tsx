@@ -1,78 +1,42 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import Modal from "../../../../components/NotePreview/Modal";
-import { fetchNoteById } from "@/lib/api";
+import { fetchNoteById } from "@/lib/api/clientApi";
+import Modal from "@/components/Modal/Modal";
 import css from "./NotePreview.module.css";
 
-type NotePreviewProps = {
-  noteId: string;
-};
-
-export default function NotePreview({ noteId }: NotePreviewProps) {
+export default function NotePreviewClient() {
   const router = useRouter();
-
+  const { id } = useParams<{ id: string }>();
   const {
     data: note,
     isLoading,
-    isError,
-    refetch,
+    error,
   } = useQuery({
-    queryKey: ["note", noteId],
-    queryFn: () => fetchNoteById(noteId),
-    refetchOnMount: false, 
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
+    refetchOnMount: false,
   });
 
-  const handleClose = () => {
-    router.back();
-  };
+  if (isLoading) return <p>Loading, please wait...</p>;
+  if (error || !note) return <p>Something went wrong.</p>;
 
-  if (isLoading) {
-    return (
-      <Modal onClose={handleClose}>
-        <div className={css.loader}>Loading note...</div>
-      </Modal>
-    );
-  }
-
-  if (isError || !note) {
-    return (
-      <Modal onClose={handleClose}>
-        <div className={css.error}>
-          <p>Failed to load note details.</p>
-          <button className={css.retryBtn} onClick={() => refetch()}>
-            Try again
-          </button>
-        </div>
-      </Modal>
-    );
-  }
+  const close = () => router.back();
 
   return (
-    <Modal onClose={handleClose}>
-      <div className={css.container} key={noteId}>
-        <button className={css.backBtn} onClick={handleClose}>
-          ✕
-        </button>
-
+    <Modal onClose={close}>
+      <button className={css.backBtn} onClick={close}>
+        Back
+      </button>
+      <div className={css.container}>
         <div className={css.item}>
           <div className={css.header}>
             <h2>{note.title}</h2>
-            <span className={css.date}>
-              {note.createdAt
-                ? new Date(note.createdAt).toLocaleDateString()
-                : ""}
-            </span>
+            <p className={css.tag}>{note.tag}</p>
           </div>
-
-          <div className={css.content}>{note.content}</div>
-
-          {note.tag && (
-            <div>
-              <span className={css.tag}>{note.tag}</span>
-            </div>
-          )}
+          <p className={css.content}>{note.content}</p>
+          <p className={css.date}>{note.createdAt}</p>
         </div>
       </div>
     </Modal>

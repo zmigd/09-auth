@@ -1,36 +1,29 @@
-// lib/store/noteStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { NewNoteData } from "@/types/note";
 
-export type NoteTag = "Work" | "Personal" | "Meeting" | "Shopping" | "Todo";
+type NoteDraftStore = {
+  draft: NewNoteData;
+  setDraft: (note: NewNoteData) => void;
+  clearDraft: () => void;
+};
 
-export interface DraftNote {
-  title: string;
-  content: string;
-  tag: NoteTag;
-}
-
-const initialDraft: DraftNote = {
+const initialDraft: NewNoteData = {
   title: "",
   content: "",
   tag: "Todo",
 };
 
-interface NoteStore {
-  draft: DraftNote;
-  setDraft: (note: Partial<DraftNote>) => void;
-  clearDraft: () => void;
-}
-
-export const useNoteStore = create<NoteStore>()(
+export const useNoteDraftStore = create<NoteDraftStore>()(
   persist(
     (set) => ({
       draft: initialDraft,
-      setDraft: (note) => set((state) => ({ draft: { ...state.draft, ...note } })),
-      clearDraft: () => set({ draft: initialDraft }),
+      setDraft: (note) => set(() => ({ draft: note })),
+      clearDraft: () => set(() => ({ draft: initialDraft })),
     }),
     {
-      name: "note-draft", // ключ для localStorage
+      name: "note-draft",
+      partialize: (state) => ({ draft: state.draft }),
     }
   )
 );

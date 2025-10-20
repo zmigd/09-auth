@@ -17,7 +17,6 @@
   flex-direction: column;
   justify-content: space-between;
   min-height: 180px;
-  
 }
 
 .title {
@@ -74,18 +73,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.tag-link {
-  text-decoration: none;
-  transition: all 0.2s ease-in-out 0.15s;
-}
-
-
-.tag-link:hover {
-  background-color: #d0e5ff;       
-  border-color: #0d6efd;           
-  color: #0a58ca;                  
-  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2); 
 }
 
 .link {
