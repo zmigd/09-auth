@@ -39,7 +39,13 @@ export default function Edit() {
         <h1 className={css.formTitle}>Edit Profile</h1>
 
         {avatar && (
-          <Image src={avatar} alt="User Avatar" width={120} height={120} className={css.avatar} />
+          <Image
+            src={avatar}
+            alt="User Avatar"
+            width={120}
+            height={120}
+            className={css.avatar}
+          />
         )}
 
         <form onSubmit={handleSaveUser} className={css.profileInfo}>
@@ -62,9 +68,7 @@ export default function Edit() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                router.push("/profile");
-              }}
+              onClick={() => router.back()} 
               className={css.cancelButton}
             >
               Cancel
